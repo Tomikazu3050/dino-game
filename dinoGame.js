@@ -6,6 +6,7 @@ const imageNames =['bird', 'cactus', 'dino'];
 const game = {
   counter: 0,
   backGrounds: [],
+  backGrounds2: [],
   bgm1: new Audio('bgm/fieldSong.mp3'),
   bgm2: new Audio('bgm/jump.mp3'),
   enemys: [],
@@ -67,16 +68,23 @@ function ticker() {
   if (game.counter % 10 === 0) {
     createBackGround();
   }
+
+  //雲背景の作成
+  if (game.counter % 50 === 0) {
+    createBackGroundClouds();
+  }
   // 敵キャラクタの生成
   createEnemys();
 
   // キャラクタの移動
   moveBackGrounds(); // 背景の移動
+  moveBackGroundsClouds(); // 雲背景の移動
   moveDino(); //恐竜の移動
   moveEnemys(); //敵キャラクタの移動
 
   //描画
   drawBackGrounds(); //背景の描画
+  drawBackGroundsClouds(); //雲背景の描画
   drawDino(); //恐竜の描画
   drawEnemys(); //敵キャラクタの描画
   drawScore(); //スコアの描画
@@ -109,6 +117,18 @@ function createBackGround() {
       y: canvas.height,
       width: 200,
       moveX: -20,
+    });
+  }
+}
+
+function createBackGroundClouds() {
+  game.backGrounds2 = [];
+  for (let x = 0; x <= canvas.width; x += 200) {
+    game.backGrounds2.push({
+      x: x,
+      y: Math.random() * 100 + 50, //雲の高さをランダム
+      size: Math.random() * 20 + 20, //雲のサイズをランダム
+      moveX: -5
     });
   }
 }
@@ -161,6 +181,13 @@ function moveBackGrounds() {
   }
 }
 
+function moveBackGroundsClouds() {
+  for(const backGround2 of game.backGrounds2) {
+    backGround2.x += backGround2.moveX;
+  }
+  game.backGrounds2 = game.backGrounds2.filter(cloud => cloud.x > -100);
+}
+
 function moveDino() {
   game.dino.y += game.dino.moveY;
   if (game.dino.y >= canvas.height -game.dino.height /2) {
@@ -187,6 +214,25 @@ function drawBackGrounds() {
     ctx.fillRect(backGround.x + 50, backGround.y -15, backGround.width - 100, 5);
   }
 }
+
+function drawBackGroundsClouds() {
+  ctx.fillStyle = 'silver';
+  for (const backGround2 of game.backGrounds2) {
+    drawCloud(backGround2.x, backGround2.y, backGround2.size);
+  }
+}
+
+
+function drawCloud(x, y, size) {
+  ctx.beginPath();
+  ctx.arc(x, y, size, 0, Math.PI * 2); // 中央の円
+  ctx.arc(x + size * 0.6, y - size * 0.4, size * 0.8, 0, Math.PI * 2); // 右上の円
+  ctx.arc(x - size * 0.6, y - size * 0.4, size * 0.8, 0, Math.PI * 2); // 左上の円
+  ctx.arc(x + size * 0.4, y + size * 0.3, size * 0.7, 0, Math.PI * 2); // 右下の円
+  ctx.arc(x - size * 0.4, y + size * 0.3, size * 0.7, 0, Math.PI * 2); // 左下の円
+  ctx.fill();
+}
+
 
 function drawDino() {
   ctx.drawImage(game.image.dino, game.dino.x - game.dino.width / 2, game.dino.y - game.dino.height / 2);
